@@ -1,0 +1,21 @@
+{
+    "path_csv": "ref_files/tcga_ref_diagnostic.csv",
+    "patch_data_path": "_Patches256x256/",
+    "img_size": 256,
+    "max_patch_per_wsi":100,
+    "weights_decay":0,
+    "lr": 5e-3,
+    "num_epochs": 50,
+    "n_workers": 10,
+    "device": 0,
+    "flag": "roche_tissue_warmup",
+    "save_dir": "checkpoints/roche_tissue_warmup/",
+    "summary_path": "summaries_tissue_pred_warmup/",
+    "log_interval": 100,
+    "bag_size": 50,
+    "batch_size": 8,
+    "quick": 0,
+    "optimizer": "Adam",
+    "test_ids": "../test_ids.txt",
+    "classes": ["Eyes", "Lung", "Pancreas", "Uterus", "Kidney", "Eshopagus", "Brain", "Rectum", "Ovary"]
+}
