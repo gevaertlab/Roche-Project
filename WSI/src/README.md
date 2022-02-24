@@ -4,7 +4,7 @@ Source python files for the training of the models and other miscellaneous tasks
 
 ## Files
 
-- **create_ref*.py**: Creation of the reference files for the training of the models. These files contain the name of the WSI file, the RNA values (if available), the label of the sample and the TCGA project.
+- **create_ref\*.py**: Creation of the reference files for the training of the models. These files contain the name of the WSI file, the RNA values (if available), the label of the sample and the TCGA project.
 - **fusion.py**: Fusion model and main script for its training: 
     - **--config**: config file with training parameters.
     - **--checkpoint**: if a model checkpoint is provided it will be loaded.
