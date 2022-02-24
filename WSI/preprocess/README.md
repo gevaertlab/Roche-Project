@@ -4,7 +4,7 @@ Preprocess utilities for reading the SVS files and getting a single LMDB databas
 
 ## Files
 
-- *move_svs.py*: Move the SVS files from their original folders when downloaeded from TCGA to a single folder for later pre-processing.
+- **move_svs.py**: Move the SVS files from their original folders when downloaeded from TCGA to a single folder for later pre-processing.
     - **--dir**: Directory containing the hierarchy of folders ans vsvs files.
 - **patch_gen_grid.py**: Generate patches from a given folder of SVS images.
     - **--wsi_path**: Path to the input directory of WSI files.
