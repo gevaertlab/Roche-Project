@@ -278,6 +278,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', default=None, help='Output dir for the image.')
     parser.add_argument('--suffix', default=None, help='Suffix for the image to be saved.')
     parser.add_argument('--regression', action="store_true", help='If we are treating the problem as regression.')
+    parser.add_argument('--attention', action="store_true", help='If the attention model is used.')
     parser.add_argument('--thresholds', default=None, nargs='+', help='Thresholds to be used if regression wanted to be used.')
     args = parser.parse_args()
 
@@ -289,6 +290,8 @@ if __name__ == '__main__':
         args.classes = ['Pattern3', 'Pattern4', 'Pattern5']
     elif args.problem == 'gleason':
         args.classes = ['Pattern10', 'Pattern6', 'Pattern7', 'Pattern8', 'Pattern9']
+    elif args.problem == 'fivetissue':
+        args.classes = ['Cervical', 'Chol', 'Colon', 'Eshopagus', 'Rectum']
 
     if args.regression:
         args.num_outputs = 1
@@ -308,7 +311,10 @@ if __name__ == '__main__':
         for n, param in layer.named_parameters():
             param.requires_grad = True
 
-    model = AggregationModel(resnet50, num_outputs=args.num_outputs)
+    if args.attention:
+        model = AggregationModelAttention(resnet50, num_outputs=args.num_outputs)
+    else:
+        model = AggregationModel(resnet50, num_outputs=args.num_outputs)
 
     if args.checkpoint is not None:
         print('Restoring from checkpoint')
