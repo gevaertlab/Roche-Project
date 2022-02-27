@@ -1,0 +1,10 @@
+{
+"rna_path" : "data/pancancer_12_mRNA.csv",
+"pathway_path" : "data/pathway_mask_GO.csv",
+"col_name" : "cancer",
+"selected_class" : ["CESC", "CHOL", "COAD", "ESCA", "READ"],
+"output_dir" : "Results/Tumor_5_classification",
+"epoch" : 10000,
+"test_size" : 0.2,
+"K_fold" : 1
+}
