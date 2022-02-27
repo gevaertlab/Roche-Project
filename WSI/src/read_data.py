@@ -173,15 +173,28 @@ class PatchBagRNADataset(Dataset):
             if not os.path.exists(os.path.join('../'+project+self.patch_data_path, WSI)):
                 print('Not exist {}'.format(os.path.join('../'+project+self.patch_data_path, WSI)))
                 continue
+            
             #try:
             path = os.path.join('../'+project+self.patch_data_path, WSI, WSI)
-            lmdb_connection = lmdb.open(path,
-                                        subdir=False, readonly=True, 
-                                        lock=False, readahead=False, meminit=False)
-        
-            with lmdb_connection.begin(write=False) as lmdb_txn:
-                n_patches = lmdb_txn.stat()['entries'] - 1
-                keys = pickle.loads(lz4framed.decompress(lmdb_txn.get(b'__keys__')))
+            try:
+                lmdb_connection = lmdb.open(path,
+                                            subdir=False, readonly=True, 
+                                            lock=False, readahead=False, meminit=False)
+            except:
+                path = path + '.db'
+                try:
+                    lmdb_connection = lmdb.open(path,
+                                                subdir=False, readonly=True, 
+                                                lock=False, readahead=False, meminit=False)
+                except:
+                    continue
+            try:
+                with lmdb_connection.begin(write=False) as lmdb_txn:
+                    n_patches = lmdb_txn.stat()['entries'] - 1
+                    keys = pickle.loads(lz4framed.decompress(lmdb_txn.get(b'__keys__')))
+            except Exception as e:
+                print(e)
+                continue
 
             #except:
             #    print('Error with loc file {}'.format(os.path.join('../'+project+self.patch_data_path, WSI)))
