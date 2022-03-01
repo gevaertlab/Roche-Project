@@ -45,3 +45,26 @@ Source python files for the training of the models and other miscellaneous tasks
 - **resnet.py** implementation of the resnet network.
 - **test_panda.py**: evaluation of a model on the panda challange dataset.
 - **wsi_model.py**: wsi model architecture and training and evaluation functions.
+
+## Example of execution scripts
+
+```
+# Run training on the five tissue classification problem
+python3 main.py --seed 99 --config configs/config_tcga_tissue_five.json --log 0 --parallel 0 --labels_reg 0  --class_weights --attention --save_dir checkpoints/roche_tcga_tissue_five_gated/ --flag roche_tissue_five_gated --bag_size 50 --max_patch_per_wsi 100
+
+# Run training on the twelve tissue classification problem
+python3 main.py --seed 99 --config configs/config_tcga_twelve_tissue.json --log 0 --parallel 0 --labels_reg 0 --save_dir checkpoints/roche_tcga_twelve_tissue/ --flag roche_twelve_tissue --bag_size 50 --max_patch_per_wsi 100
+
+# Run heatmap obtention
+python3 heatmap.py --wsi_path ../TCGA-CESC/TCGA-FU-A3HZ-01Z-00-DX1.1E78D8EF-B1FF-49AC-9EC4-D6CC2CD5D170.svs --patch_size 256 --checkpoint checkpoints/roche_tcga_tissue_five_gated/model_dict_best.pt --cuda True --problem fivetissue --grad_cam 0 --label Cervical --output_dir heatmaps/heatmap_five_tissue --suffix cesc --attention
+
+# Run primary grade training
+python3 main.py --seed 99 --config configs/grade/config_tcga_grade_prad.json --log 0 --parallel 0 --labels_reg 0  --class_weights --attention --save_dir checkpoints/roche_grade_class_prad_gated/ --flag roche_grade_prad_gated --bag_size 50 --max_patch_per_wsi 100
+
+# Run fusion training for tissues
+python3 fusion.py --seed 99 --config configs/config_tcga_tissue_fusion.json --log 0
+
+# Run primary grade prediction as regression problem
+python3 main.py --seed 99 --config configs/config_tcga_grade_sec_prad_reg.json --log 0 --parallel 0 --labels_reg 1
+
+```
