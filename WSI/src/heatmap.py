@@ -225,7 +225,6 @@ def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: 
                             probs = F.softmax(outputs.detach().cpu(), dim=1)
                             probabilities.append(probs.numpy())
                             _, pos = torch.max(probs, 1)
-                            print(pos)
                         color = colors[pos]
                         visualization = np.empty((64,64,3), np.uint8)
                         visualization[:] = color[0], color[1], color[2]
@@ -270,12 +269,12 @@ def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: 
                 continue
     
     if bag_size > 0:
-        bagpatch = torch.from_numpy(np.asarray(bag))
-        bagpatch = transforms_(bagpatch)
+        bag = torch.stack(bag, dim=0)
+        bagpatch = transforms_(bag)
         bagpatch = bagpatch.unsqueeze(0)
         if args.cuda:
             bagpatch = bagpatch.to('cuda:0')
-        bagpatch = transforms_(bagpatch)
+
         if args.grad_cam:
             targets = [ClassifierOutputTarget(args.category[0])]
             label = torch.tensor(args.category, dtype=torch.float32)
