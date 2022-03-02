@@ -102,7 +102,6 @@ def get_prob_reg(output, thresholds):
 
 def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: nn.Module,
                       args: dict):
-    model.eval()
     transforms_ = torch.nn.Sequential(
     transforms.ConvertImageDtype(torch.float),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
@@ -168,7 +167,11 @@ def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: 
         probabilities = []
         tissue_area = 0
         num_total_tiles = 0
-
+    
+    bag_size = 0
+    saved_indexes = []
+    bag = []
+    patches_original = []
     for x, y in tqdm(indices):
         # check if in background mask
         x_mask = int(x / ratio_x)
@@ -181,50 +184,68 @@ def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: 
             except Exception as e:
                 print("error with slide id {} patch {}".format(slide_id, i))
                 print(e)
+
             if (mask_patch.sum() > BACKGROUND_THRESHOLD * mask_patch.size) and not (is_low_contrast(patch)):
                 if resize_factor != 1.0:
                     patch = patch.resize(patch_size)
-                bagpatch = torch.from_numpy(np.array(patch)).permute(2,0,1)
-                bagpatch = bagpatch.unsqueeze(0).unsqueeze(0) # necessary for being a bag of patches
-                if args.cuda:
-                    bagpatch = bagpatch.to('cuda:0')
-                bagpatch = transforms_(bagpatch)
-                if args.grad_cam:
-                    targets = [ClassifierOutputTarget(args.category[0])]
-                    label = torch.tensor(args.category, dtype=torch.float32)
-                    grayscale_cam = cam(input_tensor=bagpatch, targets=targets)
-                    #grayscale_cam = grayscale_cam[0, :]
-                    c, h, w = grayscale_cam.shape
-                    grayscale_cam = grayscale_cam.reshape(h,w,c)
-                    patch = np.array(patch)/255
-                    visualization = cv2.applyColorMap(np.uint8(255 * grayscale_cam), cv2.COLORMAP_JET)
-                    visualization = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)
-                    
-                    visualization = cv2.resize(visualization, dsize=(64,64), interpolation=cv2.INTER_CUBIC)
-                else:
-                    with torch.set_grad_enabled(False):
-                        outputs = model(bagpatch)
-                    if args.regression:
-                        probs, pos = get_prob_reg(outputs, args.thresholds)
-                        probabilities.append(probs)
-                    else:
-                        probs = F.softmax(outputs.detach().cpu(), dim=1)
-                        probabilities.append(probs.numpy())
-                        _, pos = torch.max(probs, 1)
-                    color = colors[pos]
-                    visualization = np.empty((64,64,3), np.uint8)
-                    visualization[:] = color[0], color[1], color[2]
-                    tissue_area += 64*64
-                    areas_class[args.classes[pos]] += 64*64
-                    class_predictions[args.classes[pos]] += 1
-                    num_total_tiles += 1
+                patches_original.append(np.array(patch))
+                image = np.copy(np.array(patch))
+                bagpatch = torch.from_numpy(image).permute(2,0,1)       
 
-                heatmap = assig_to_heatmap(heatmap,visualization, x, y, 
-                                           ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
-                patch = patch.resize((64,64))
-                patch = np.array(patch)
-                slide_resized = assig_to_heatmap(slide_resized,patch, x, y, 
-                                           ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
+                bag.append(bagpatch)
+                #bagpatch = bagpatch.unsqueeze(0).unsqueeze(0) # necessary for being a bag of patches
+                bag_size += 1
+                saved_indexes.append((x,y))
+                if bag_size % 50 == 0:
+                    bag = torch.stack(bag, dim=0)
+                    bagpatch = transforms_(bag)
+                    bagpatch = bagpatch.unsqueeze(0)
+                    if args.cuda:
+                        bagpatch = bagpatch.to('cuda:0')
+                    if args.grad_cam:
+                        targets = [ClassifierOutputTarget(args.category[0])]
+                        label = torch.tensor(args.category, dtype=torch.float32)
+                        grayscale_cam = cam(input_tensor=bagpatch, targets=targets)
+                        #grayscale_cam = grayscale_cam[0, :]
+                        c, h, w = grayscale_cam.shape
+                        grayscale_cam = grayscale_cam.reshape(h,w,c)
+                        patch = np.array(patch)/255
+                        visualization = cv2.applyColorMap(np.uint8(255 * grayscale_cam), cv2.COLORMAP_JET)
+                        visualization = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)
+                        
+                        visualization = cv2.resize(visualization, dsize=(64,64), interpolation=cv2.INTER_CUBIC)
+                    else:
+                        with torch.set_grad_enabled(False):
+                            outputs = model(bagpatch)
+                        
+                        if args.regression:
+                            probs, pos = get_prob_reg(outputs, args.thresholds)
+                            probabilities.append(probs)
+                        else:
+                            probs = F.softmax(outputs.detach().cpu(), dim=1)
+                            probabilities.append(probs.numpy())
+                            _, pos = torch.max(probs, 1)
+                            print(pos)
+                        color = colors[pos]
+                        visualization = np.empty((64,64,3), np.uint8)
+                        visualization[:] = color[0], color[1], color[2]
+                        tissue_area += 64*64
+                        areas_class[args.classes[pos]] += 64*64
+                        class_predictions[args.classes[pos]] += 1
+                        num_total_tiles += 1
+
+                    for i, (x,y) in enumerate(saved_indexes):
+                        heatmap = assig_to_heatmap(heatmap,visualization, x, y, 
+                                                ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
+                        patch = patches_original[i].resize((64,64))
+                        patch = np.array(patch)
+                        slide_resized = assig_to_heatmap(slide_resized,patch, x, y, 
+                                                ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
+                    
+                    bag_size = 0
+                    saved_indexes = []
+                    bag = []
+                    patches_original = []
             else:
                 #if resize_factor != 1.0:
                 patch = patch.resize((64,64))
@@ -247,6 +268,51 @@ def generate_heatpmap(slide_path: str, patch_size: Tuple, slide_id: str, model: 
                                            ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
             except:
                 continue
+    
+    if bag_size > 0:
+        bagpatch = torch.from_numpy(np.asarray(bag))
+        bagpatch = transforms_(bagpatch)
+        bagpatch = bagpatch.unsqueeze(0)
+        if args.cuda:
+            bagpatch = bagpatch.to('cuda:0')
+        bagpatch = transforms_(bagpatch)
+        if args.grad_cam:
+            targets = [ClassifierOutputTarget(args.category[0])]
+            label = torch.tensor(args.category, dtype=torch.float32)
+            grayscale_cam = cam(input_tensor=bagpatch, targets=targets)
+            #grayscale_cam = grayscale_cam[0, :]
+            c, h, w = grayscale_cam.shape
+            grayscale_cam = grayscale_cam.reshape(h,w,c)
+            patch = np.array(patch)/255
+            visualization = cv2.applyColorMap(np.uint8(255 * grayscale_cam), cv2.COLORMAP_JET)
+            visualization = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)
+            
+            visualization = cv2.resize(visualization, dsize=(64,64), interpolation=cv2.INTER_CUBIC)
+        else:
+            with torch.set_grad_enabled(False):
+                outputs = model(bagpatch)
+            if args.regression:
+                probs, pos = get_prob_reg(outputs, args.thresholds)
+                probabilities.append(probs)
+            else:
+                probs = F.softmax(outputs.detach().cpu(), dim=1)
+                probabilities.append(probs.numpy())
+                _, pos = torch.max(probs, 1)
+            color = colors[pos]
+            visualization = np.empty((64,64,3), np.uint8)
+            visualization[:] = color[0], color[1], color[2]
+            tissue_area += 64*64
+            areas_class[args.classes[pos]] += 64*64
+            class_predictions[args.classes[pos]] += 1
+            num_total_tiles += 1
+
+        for i, (x,y) in enumerate(saved_indexes):
+            heatmap = assig_to_heatmap(heatmap,visualization, x, y, 
+                                    ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
+            patch = patches_original[i].resize((64,64))
+            patch = np.array(patch)
+            slide_resized = assig_to_heatmap(slide_resized,patch, x, y, 
+                                    ratio_patch_x, ratio_patch_y, xmax_patch, ymax_patch)
     
     statistics = {
         'probabilities': np.array(probabilities)
@@ -307,20 +373,20 @@ if __name__ == '__main__':
     layers_to_train = [resnet50.fc, resnet50.layer4, resnet50.layer3]
     for param in resnet50.parameters():
         param.requires_grad = False
-    for layer in layers_to_train:
-        for n, param in layer.named_parameters():
-            param.requires_grad = True
 
     if args.attention:
         model = AggregationModelAttention(resnet50, num_outputs=args.num_outputs)
     else:
         model = AggregationModel(resnet50, num_outputs=args.num_outputs)
 
-    if args.checkpoint is not None:
-        print('Restoring from checkpoint')
-        print(args.checkpoint)
-        model.load_state_dict(torch.load(args.checkpoint))
+    #if args.checkpoint is not None:
+    print('Restoring from checkpoint')
+    print(args.checkpoint)
+    model.load_state_dict(torch.load(args.checkpoint))
 
+    for param in model.parameters():
+        param.requires_grad = False
+    
     model = model.to('cuda:0')
     args.patch_size = [args.patch_size, args.patch_size]
     heatmap, slide_resized, statistics = generate_heatpmap(args.wsi_path, args.patch_size, 0, model, args)
@@ -384,6 +450,6 @@ if __name__ == '__main__':
             axs[i].set_title(args.classes[i])
         plt.savefig(name_histo, dpi=300)
     else:
-        concat_image = cv2.hconcat([slide_resized, heatmap])
-        cv2.imwrite(name_image, concat_image)
+        #concat_image = cv2.hconcat([slide_resized, heatmap])
+        cv2.imwrite(name_image, heatmap)
 
