@@ -2,8 +2,13 @@
 "rna_path" : "data/pancancer_12_mRNA.csv",
 "pathway_path" : "data/pathway_mask_GO.csv",
 "col_name" : "cancer",
+<<<<<<< HEAD
 "selected_class" : null,
 "output_dir" : "Results/tumor_12_classification",
+=======
+"selected_class" : {},
+"output_dir" : "Results/tumor_classification",
+>>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475
 "epoch" : 10000,
 "test_size" : 0.2,
 "K_fold" : 1

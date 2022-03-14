@@ -3,8 +3,13 @@
 "pathway_path" : "data/pathway_mask_GO.csv",
 "col_name" : "cancer",
 "selected_class" : ["CESC", "CHOL", "COAD", "ESCA", "READ"],
+<<<<<<< HEAD
 "output_dir" : "Results/Tumor_5_classification_rerun",
 "epoch" : 5000,
+=======
+"output_dir" : "Results/Tumor_5_classification",
+"epoch" : 10000,
+>>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475
 "test_size" : 0.2,
 "K_fold" : 1
 }

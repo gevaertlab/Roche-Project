@@ -6,7 +6,10 @@ import datetime
 from DataLoader import load_data, load_pathway
 from Train import trainPASNet
 from EvalFunc import auc, f1, balanced_acc, generate_confusion_matrix
+<<<<<<< HEAD
 from visulization import view_class
+=======
+>>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475
 import pandas as pd
 import torch
 import numpy as np
@@ -59,7 +62,10 @@ data, class2idx, idx2class = read_data(rna_path, col_name, selected_class)
 pathway = pd.read_csv(pathway_path, index_col = 0)
 data, pathway = findCommonGenesPathways(data, pathway, col_name)
 pathway_mask = load_pathway(pathway,dtype)
+<<<<<<< HEAD
 view_class(data, col_name, idx2class, output_dir, "class_distribution.png")
+=======
+>>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475
 
 ''' Net Settings'''
 In_Nodes = data.shape[1] - 1
@@ -86,6 +92,7 @@ for fold in range(K_fold):
 	print("fold: ", fold)
 	save_model = "model_fold_"+str(fold)+ '_{date:%Y-%m-%d %H:%M:%S}'.format(date=datetime.datetime.now()) + ".pt" # the name to save the model
 	save_pic =  "confusion_matrix_fold_"+str(fold)+'_{date:%Y-%m-%d %H:%M:%S}'.format(date=datetime.datetime.now()) + ".png"
+<<<<<<< HEAD
 	pdb.set_trace()
 	x_train, y_train, x_test, y_test = load_data(data, col_name, train_index_list[fold], test_index_list[fold], dtype)
 	print("train size:" + str(len(train_index_list[fold])))
@@ -93,6 +100,9 @@ for fold in range(K_fold):
 	view_class(data.loc[train_index_list[fold], ], col_name, idx2class, output_dir, "train distribution.png")
 	view_class(data.loc[test_index_list[fold], ], col_name, idx2class, output_dir, "test distribution.png")
 	print("train test overlap:", len(set.intersection(set(train_index_list[fold]),set(test_index_list[fold]))))
+=======
+	x_train, y_train, x_test, y_test = load_data(data, col_name, train_index_list[fold], test_index_list[fold], dtype)
+>>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475
 	pred_train, pred_test, loss_train, loss_test, model = trainPASNet(x_train, y_train, x_test, y_test, pathway_mask, \
 														In_Nodes, Pathway_Nodes, Hidden_Nodes, Out_Nodes, \
 														opt_lr, opt_l2, nEpochs, Dropout_Rates, optimizer = "Adam", \
