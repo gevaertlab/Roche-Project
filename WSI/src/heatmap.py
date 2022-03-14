@@ -411,16 +411,16 @@ if __name__ == '__main__':
 
     if not args.grad_cam:
         # save images
-        f, (ax1,ax2) = plt.subplots(nrows=1,ncols=2)
+        f, ax1 = plt.subplots(nrows=1,ncols=1)
         colors = statistics['colors']
         ax1.imshow(heatmap)
-        ax2.imshow(slide_resized)
+        #ax2.imshow(slide_resized)
         #ax = plt.gca()
         #  hide x-axis
         ax1.get_xaxis().set_visible(False)
         ax1.get_yaxis().set_visible(False)
-        ax2.get_xaxis().set_visible(False)
-        ax2.get_yaxis().set_visible(False)
+        #ax2.get_xaxis().set_visible(False)
+        #ax2.get_yaxis().set_visible(False)
         handles = [Rectangle((0,0),1,1, color =tuple(map(lambda x: x/255,c))) for c in colors]
         plt.title(args.label)
         plt.legend(handles, args.classes,loc='upper center', 
@@ -451,4 +451,5 @@ if __name__ == '__main__':
     else:
         #concat_image = cv2.hconcat([slide_resized, heatmap])
         cv2.imwrite(name_image, heatmap)
+
 
