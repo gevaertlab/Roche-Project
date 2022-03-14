@@ -1,0 +1,16 @@
+
+{ "cancer": "PRAD",
+  "csv_path": "/content/drive/My Drive/Roche/Data/PRAD_rna_clinical.csv",
+  "col_name": "primary_gleason_grade",
+  "batch_size": 64,
+  "use_cuda": 0,
+  "num_workers": 10,
+  "num_epochs": 300,
+  "lr_rna": 1e-5,
+  "lr_mlp": 1e-5,
+  "weight_decay": 1e-5,
+  "flag": "model_rna",
+  "save_dir": "/content/drive/My Drive/Roche/Models",
+  "summary_dir": "/content/drive/My Drive/Roche/Models",
+  "result_dir":"/content/drive/My Drive/Roche/Results"
+}
