@@ -109,7 +109,6 @@ def trainPASNet(train_x, train_y, eval_x, eval_y, pathway_mask, \
 			###update weights in net
 			net_state_dict[name].copy_(optimal_transformed_param)
 		
-<<<<<<< HEAD
 		# net.eval()
 		# eval_pred = net(eval_x)
 		# eval_loss = cross_entropy_for_imbalance(eval_pred, eval_y, Out_Nodes).view(1,)
@@ -126,23 +125,3 @@ def trainPASNet(train_x, train_y, eval_x, eval_y, pathway_mask, \
 			eval_loss = cross_entropy_for_imbalance(eval_pred, eval_y, Out_Nodes).view(1,)
 
 	return (train_pred, eval_pred, train_loss, eval_loss, net)
-=======
-		net.eval()
-		eval_pred = net(eval_x)
-		eval_loss = cross_entropy_for_imbalance(eval_pred, eval_y, Out_Nodes).view(1,)
-		eval_acc = balanced_acc(eval_pred, eval_y)
-		output = f'Epoch {epoch+0:03}: | train_loss: {loss:.5f} | train_acc: {acc:.3f} | eval_loss:{eval_loss.item():.5f}| eval_acc:{eval_acc.item():.3f}\n'
-		if train_writter is not None:
-			with open(train_writter, "a+") as f:
-				f.write(output)
-		# if epoch == nEpochs - 1:
-		# 	net.train()
-		# 	train_pred = net(train_x)
-		# 	train_loss = cross_entropy_for_imbalance(train_pred, train_y, Out_Nodes).view(1,)
-
-		# 	net.eval()
-		# 	eval_pred = net(eval_x)
-		# 	eval_loss = cross_entropy_for_imbalance(eval_pred, eval_y, Out_Nodes).view(1,)
-
-	return (pred, eval_pred, loss, eval_loss, net)
->>>>>>> 682a2bdc3ccdfa85b6dcf0aa515aff14f2411475

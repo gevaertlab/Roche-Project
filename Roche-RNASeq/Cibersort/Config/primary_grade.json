@@ -1,0 +1,13 @@
+{
+"clinical_data": "../PASNet/data/PRAD_rna_clinical.csv",
+"x_axis": "primary_gleason_grade",
+"x_label": "Grade", 
+"y_label": "Proportion (%)",
+"cell_data": "data/CIBERSORTx_Job4_Results.csv",
+"plot_type": "violin",
+"test_method": "Kruskal",
+"adjusted_method": "HB",
+"output_dir": "Results",
+"generate_group_graph": "True",
+"generate_seperate_graph": "False"
+}

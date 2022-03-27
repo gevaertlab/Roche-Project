@@ -29,66 +29,6 @@ from dataloader.dataloader_rna import TrainData, ValData, TestData
 from evaluation.metrics import binary_acc, multi_acc, MCC, MSE, correlation
 from evaluation.eval_rna import evaluate_multi, evaluate_regr 
 
-
-def prepare_multi(data, col_name, random_num, summary_writter, file_name, args):
-      data = data[data[col_name].notnull()].copy()
-      class2idx = {}
-      i = 0
-      for t in data[col_name].unique():
-        class2idx[t] = i
-        i = i + 1
-      idx2class = {v: k for k, v in class2idx.items()}
-      data[col_name].replace(class2idx, inplace=True)
-      X = data.filter(regex = ("rna*"))
-      y = data.loc[:, col_name]
-      X_trainval, X_test, y_trainval, y_test = train_test_split(X, y, test_size=0.2, stratify = y, random_state=random_num)
-      X_train, X_val, y_train, y_val = train_test_split(X_trainval, y_trainval,test_size=0.2, stratify=y_trainval, random_state=random_num)
-      print(X_train.shape, X_val.shape, X_test.shape)
-
-      scaler = StandardScaler()
-      X_train = scaler.fit_transform(X_train)
-      X_val = scaler.transform(X_val)
-      X_test = scaler.transform(X_test)
-
-      train_data = TrainData(torch.tensor(X_train.astype(np.float32)), torch.tensor(y_train.astype(np.long)))
-      val_data = ValData(torch.tensor(X_val.astype(np.float32)), torch.tensor(y_val.astype(np.long)))
-      test_data = TestData(torch.tensor(X_test.astype(np.float32)), torch.tensor(y_test.astype(np.long)))
-
-      target_list = []
-      for _, t in train_data:
-        target_list.append(t)
-      target_list = torch.tensor(target_list)
-
-      unique, counts = np.unique(target_list, return_counts=True)
-      class_weights = 1./torch.tensor(counts, dtype=torch.float)
-      class_weights_all = class_weights[target_list]
-
-      weighted_sampler = WeightedRandomSampler(
-        weights=class_weights_all,
-        num_samples=len(class_weights_all),
-        replacement=True
-       )
-
-      train_loader = DataLoader(dataset=train_data, batch_size=args["batch_size"], sampler = weighted_sampler)
-      val_loader = DataLoader(dataset=val_data, batch_size=1)
-      test_loader = DataLoader(dataset=test_data, batch_size=1)
-
-      device = torch.device("GPU" if (torch.cuda.is_available() and args['use_cuda']) else "cpu")
-      print(device)
-      num_features = X.shape[1]
-      print(num_features)
-      num_labels = len(class2idx)
-      model =  MultiClassification(num_features = num_features, num_labels = num_labels)
-      model.to(device)
-      optimizer = optim.Adam(model.parameters(), lr=args["lr_rna"])
-
-      acc, loss = train_multi(model, train_loader, val_loader, num_labels, optimizer, device,
-                class_weights = class_weights,
-                num_epochs = args['num_epochs'], save_dir = args['save_dir'], file_name = file_name,summary_writter = summary_writter)
-
-      return acc, loss
-
-
 def train_multi(model, train_loader, test_loader, num_labels, optimizer, device, class_weights = None, num_epochs = 10, save_dir = ".", file_name = "model_dict_multiclass.pt", summary_writter = None):
 
     if not os.path.isdir(save_dir):

@@ -40,6 +40,22 @@ def read_data(path, col_name, selected_class):
     data[col_name].replace(class2idx, inplace=True)
     return data, class2idx, idx2class
 
+def read_data_gene(path, col_name, selected_class):
+    data = pd.read_csv(path, index_col = 0, low_memory=False)
+    data = data[data[col_name].notnull()].copy()
+    data. sort_values(by=[col_name], inplace = True)
+    X = data.filter(regex = ("rna*"))
+    y = data.loc[:, col_name]
+    X[col_name] = y
+    data = X.copy()
+    class2idx = {}
+    i = 0
+    for t in data[col_name].unique():
+        class2idx[t] = i
+        i = i + 1
+    idx2class = {v: k for k, v in class2idx.items()}
+    data[col_name].replace(class2idx, inplace=True)
+    return data, class2idx, idx2class
 
 def generate_Kfold_index(K, data, col_name, test_size):
     train_index_list = []

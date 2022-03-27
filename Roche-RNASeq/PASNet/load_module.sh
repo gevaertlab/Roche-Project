@@ -15,5 +15,5 @@ ml load py-scipy/1.1.0_py36
 ml load py-scikit-learn/0.24.2_py36 
 ml load py-numpy/1.19.2_py36
 
-python3 pasnet/Run.py --config Config/tumor_5_class.json
+python3 pasnet/Run_Gene.py --config Config/Gene_Model.json
 

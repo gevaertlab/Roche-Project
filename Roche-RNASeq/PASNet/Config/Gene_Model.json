@@ -1,0 +1,10 @@
+{
+"rna_path" : "data/PRAD_rna_clinical.csv",
+"col_name" : "primary_gleason_grade",
+"selected_class" : null,
+"output_dir" : "Results/Gene_Model",
+"epoch" : 60,
+"test_size" : 0.2,
+"Dropout_Rates" : 0.5,
+"K_fold" : 5
+}

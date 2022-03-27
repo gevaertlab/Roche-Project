@@ -35,3 +35,22 @@ class PASNet(nn.Module):
 
 		return x
 
+class MultiClassification(nn.Module):
+    def __init__(self, num_features = 17052, num_labels = 4, Dropout_Rates = 0.5):
+        super(MultiClassification, self).__init__()
+        self.num_features = num_features
+        self.num_labels = num_labels
+        self.layer_1 = nn.Linear(num_features, 4096)
+        self.layer_2 = nn.Linear(4096, 2048)
+        self.layer_3 = nn.Linear(2048, num_labels)	
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(p = Dropout_Rates)
+        self.softmax = nn.Softmax(dim = 1)
+
+    def forward(self, inputs):
+        x = self.relu(self.layer_1(inputs))
+        x = self.dropout(x)
+        x = self.relu(self.layer_2(x))
+        x = self.dropout(x)
+        x = self.softmax(self.layer_3(x))
+        return x

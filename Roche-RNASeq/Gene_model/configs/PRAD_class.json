@@ -1,5 +1,6 @@
 
-{ "cancer": "PRAD",
+{ 
+  "cancer": "PRAD",
   "csv_path": "/content/drive/My Drive/Roche/Data/PRAD_rna_clinical.csv",
   "col_name": "primary_gleason_grade",
   "batch_size": 64,

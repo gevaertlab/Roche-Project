@@ -47,7 +47,7 @@ class BinaryClassification(nn.Module):
         return x
 
 class MultiClassification(nn.Module):
-    def __init__(self, num_features = 17052, num_labels = 4):
+    def __init__(self, num_features = 17052, num_labels = 4, Dropout_Rates = 0.5):
         super(MultiClassification, self).__init__()
         self.num_features = num_features
         self.num_labels = num_labels
@@ -56,7 +56,7 @@ class MultiClassification(nn.Module):
         self.layer_3 = nn.Linear(2048, 512)
         self.layer_4 = nn.Linear(512, num_labels)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout()
+        self.dropout = nn.Dropout(p = Dropout_Rates)
 
     def forward(self, inputs):
         x = self.relu(self.layer_1(inputs))
