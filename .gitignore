@@ -1,0 +1,7 @@
+Roche-RNASeq/Cibersort/data/
+Roche-RNASeq/Cibersort/Results/
+Roche-RNASeq/PASNet/data/
+Roche-RNASeq/PASNet/Results/
+**/__pycache__/
+**/*.DS_Store
+**/*.out

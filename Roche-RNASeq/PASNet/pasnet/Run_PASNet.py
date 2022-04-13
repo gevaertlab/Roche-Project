@@ -61,6 +61,7 @@ data, pathway = findCommonGenesPathways(data, pathway, col_name)
 pathway_mask = load_pathway(pathway,dtype)
 view_class(data, col_name, idx2class, output_dir, "class_distribution.png")
 
+
 ''' Net Settings'''
 In_Nodes = data.shape[1] - 1
 Pathway_Nodes = pathway.shape[0]
